@@ -10,12 +10,16 @@ echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.d
 sudo apt update
 
 ## 2. Установка пакета из стороннего репозитория
+bash
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
 ## 3. Установка локального .deb-пакета
+bash
 cd /tmp
 wget http://archive.ubuntu.com/ubuntu/pool/universe/s/sl/sl_5.02-1_amd64.deb
 sudo dpkg -i sl_5.02-1_amd64.deb
 
 ## 4. Удаление пакета через dpkg
+bash
 sudo dpkg -r sl
+
