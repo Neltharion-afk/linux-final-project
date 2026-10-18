@@ -48,6 +48,9 @@ sudo netplan apply
 ```
 
 ### 2. Настроить /etc/hosts на всех VM
+На каждой VM открыть файл:
+```bash
+sudo nano /etc/hosts
 
 ```text
 192.168.205.102 frontend
@@ -57,6 +60,8 @@ sudo netplan apply
 192.168.205.106 mysql-slave
 192.168.205.107 elk
 ```
+
+ping -c 2 mysql-master
 
 ### 3. MySQL Master (mysql-master)
 
