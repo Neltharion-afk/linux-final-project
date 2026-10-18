@@ -177,8 +177,8 @@ sudo nginx -t && sudo systemctl restart nginx
 Установить и настроить мониторинг:
 
 
-# Node Exporter на всех VM (конфиг в monitoring/)
-# На frontend - Prometheus и Grafana (конфиги в monitoring/)
+### Node Exporter на всех VM (конфиг в monitoring/)
+### На frontend - Prometheus и Grafana (конфиги в monitoring/)
 
 ```
 sudo cp linux-final-project/monitoring/prometheus.yml /etc/prometheus/
