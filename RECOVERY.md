@@ -52,7 +52,6 @@ sudo netplan apply
 ```bash
 sudo nano /etc/hosts
 
-```text
 192.168.205.102 frontend
 192.168.205.103 backend1
 192.168.205.104 backend2
