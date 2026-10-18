@@ -235,6 +235,7 @@ bash
 sudo apt install -y grafana
 sudo systemctl enable --now grafana-server
 Подключить Prometheus как datasource в Grafana (http://localhost:9090) и импортировать дашборд Node Exporter Full (ID 1860).
+```
 
 ### 9. Проверка
 
