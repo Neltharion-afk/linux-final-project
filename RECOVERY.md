@@ -216,6 +216,26 @@ tar -xzf node_exporter-*.tar.gz
 sudo cp node_exporter-*/node_exporter /usr/local/bin/
 sudo useradd --no-create-home --shell /bin/false node_exporter
 
+Создать systemd-сервис /etc/systemd/system/node_exporter.service (конфиг в monitoring/node_exporter.service):
+
+bash
+sudo cp monitoring/node_exporter.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now node_exporter
+На frontend установить Prometheus и Grafana. Готовые конфиги лежат в папке monitoring/:
+
+bash
+sudo cp monitoring/prometheus.yml /etc/prometheus/prometheus.yml
+sudo cp monitoring/prometheus.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now prometheus
+Установить Grafana:
+
+bash
+sudo apt install -y grafana
+sudo systemctl enable --now grafana-server
+Подключить Prometheus как datasource в Grafana (http://localhost:9090) и импортировать дашборд Node Exporter Full (ID 1860).
+
 ### 9. Проверка
 
 - `curl http://192.168.205.102` — WordPress открывается.
