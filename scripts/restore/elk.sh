@@ -46,9 +46,13 @@ cp /tmp/repo/elk/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
 systemctl daemon-reload
 systemctl enable --now elasticsearch
 
-# Ждем, пока Elasticsearch поднимется
-echo ">>> Ожидание запуска Elasticsearch (30 секунд)..."
-sleep 30
+echo ">>> Ожидание запуска Elasticsearch (40 секунд)..."
+sleep 40
+
+echo ">>> Установка фиксированных паролей..."
+# Принудительно ставим известный пароль для elastic и kibana_system
+/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic -b -i <<< 'bdKp-nSdx_R8Boo2A_9h'
+/usr/share/elasticsearch/bin/elasticsearch-reset-password -u kibana_system -b -i <<< 'bdKp-nSdx_R8Boo2A_9h'
 
 echo ">>> Настройка Kibana..."
 cp /tmp/repo/elk/kibana.yml /etc/kibana/kibana.yml
