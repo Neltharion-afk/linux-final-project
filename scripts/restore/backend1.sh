@@ -34,8 +34,19 @@ rm -rf /tmp/repo
 git clone https://github.com/Neltharion-afk/linux-final-project.git /tmp/repo
 
 echo ">>> Развертывание WordPress..."
-cd /tmp && wget -q https://wordpress.org/latest.tar.gz && tar -xzf latest.tar.gz
-rm -rf /var/www/html/* && cp -r wordpress/* /var/www/html/
+cd /tmp
+rm -f latest.tar.gz
+wget --timeout=60 --tries=3 -q https://wordpress.org/latest.tar.gz
+
+# Проверка, что файл скачался без ошибок
+if ! tar -tzf latest.tar.gz > /dev/null 2>&1; then
+    echo "ОШИБКА: Архив WordPress скачался битым. Прерываем."
+    exit 1
+fi
+
+tar -xzf latest.tar.gz
+rm -rf /var/www/html/*
+cp -r wordpress/* /var/www/html/
 chown -R www-data:www-data /var/www/html/
 
 echo ">>> Настройка Apache (порты 8080 и 8082)..."
@@ -46,7 +57,7 @@ a2ensite site-8080 site-8082
 a2dissite 000-default
 
 echo ">>> Настройка wp-config.php..."
-cat > /var/www/html/wp-config.php << 'EOF'
+sudo cat > /var/www/html/wp-config.php << 'EOF'
 <?php
 define( 'DB_NAME', 'wordpress' );
 define( 'DB_USER', 'wpuser' );
