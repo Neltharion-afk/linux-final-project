@@ -39,8 +39,20 @@ rm -rf /var/www/html/* && cp -r wordpress/* /var/www/html/
 chown -R www-data:www-data /var/www/html/
 
 echo ">>> Настройка Apache (порт 8081)..."
-cp /tmp/repo/apache/backend2-ports.conf /etc/apache2/ports.conf
-cp /tmp/repo/apache/backend2-site-8081.conf /etc/apache2/sites-available/000-default.conf
+cat > /etc/apache2/ports.conf << 'EOF'
+Listen 8081
+EOF
+
+cat > /etc/apache2/sites-available/000-default.conf << 'EOF'
+<VirtualHost *:8081>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+    ErrorLog ${APACHE_LOG_DIR}/error-8081.log
+    CustomLog ${APACHE_LOG_DIR}/access-8081.log combined
+</VirtualHost>
+EOF
+
+a2ensite 000-default.conf
 
 echo ">>> Настройка wp-config.php..."
 cat > /var/www/html/wp-config.php << 'EOF'
@@ -54,6 +66,7 @@ define('WP_SITEURL', 'http://192.168.205.102');
 $table_prefix = 'wp_';
 require_once ABSPATH . 'wp-settings.php';
 EOF
+chown www-data:www-data /var/www/html/wp-config.php
 
 echo ">>> Фикс PHP (pcre.jit)..."
 echo "pcre.jit=0" >> /etc/php/8.5/apache2/php.ini
