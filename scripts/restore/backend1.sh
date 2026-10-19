@@ -76,7 +76,9 @@ cat > /etc/apache2/sites-available/site-8082.conf << 'EOF'
 </VirtualHost>
 EOF
 
-# 4. Включаем сайты
+# 4. Отключаем дефолтный сайт (он на 80)
+a2dissite 000-default.conf 2>/dev/null || true
+# 5. Включаем сайты
 a2ensite 000-default.conf
 a2ensite site-8082.conf
 
