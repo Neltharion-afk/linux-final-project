@@ -69,4 +69,14 @@ wget -q https://dl.grafana.com/oss/release/grafana_11.6.0_amd64.deb
 dpkg -i grafana_11.6.0_amd64.deb || apt install -f -y
 systemctl enable --now grafana-server
 
-echo ">>> FRONTEND успешно восстановлен! (Nginx:80, Prometheus:9090, Grafana:3000)"
+echo ">>> Установка и настройка Filebeat..."
+cd /tmp
+wget -q https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.19.23-amd64.deb
+dpkg -i filebeat-8.19.23-amd64.deb || apt install -f -y
+
+# Копируем готовый конфиг из репо
+cp /tmp/repo/elk/filebeat.yml /etc/filebeat/filebeat.yml
+filebeat modules enable nginx
+systemctl enable --now filebeat
+
+echo ">>> FRONTEND успешно восстановлен! (Nginx:80, Prometheus:9090, Grafana:3000, Filebeat)"
