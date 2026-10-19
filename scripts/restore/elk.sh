@@ -43,28 +43,13 @@ git clone https://github.com/Neltharion-afk/linux-final-project.git /tmp/repo
 
 echo ">>> Настройка Elasticsearch..."
 cp /tmp/repo/elk/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
+# Даем права на папку конфигов (чтобы keystore создавался)
+chown -R elasticsearch:elasticsearch /etc/elasticsearch
 systemctl daemon-reload
 systemctl enable --now elasticsearch
 
 echo ">>> Ожидание запуска Elasticsearch (40 секунд)..."
 sleep 40
-
-echo ">>> Установка фиксированного пароля через API..."
-# 1. Сбрасываем на автогенерируемый и забираем его
-NEW_PASS=$(/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic -b -s | tail -1)
-
-# 2. Меняем на наш фиксированный
-curl -k -s -u elastic:$NEW_PASS -X POST "https://localhost:9200/_security/user/elastic/_password" \
-     -H "Content-Type: application/json" \
-     -d '{"password":"bdKp-nSdx_R8Boo2A_9h"}' > /dev/null
-
-# 3. То же самое для kibana_system (чтобы Kibana могла подключиться)
-NEW_KIBANA_PASS=$(/usr/share/elasticsearch/bin/elasticsearch-reset-password -u kibana_system -b -s | tail -1)
-curl -k -s -u elastic:bdKp-nSdx_R8Boo2A_9h -X POST "https://localhost:9200/_security/user/kibana_system/_password" \
-     -H "Content-Type: application/json" \
-     -d '{"password":"bdKp-nSdx_R8Boo2A_9h"}' > /dev/null
-
-echo ">>> Пароли успешно установлены на bdKp-nSdx_R8Boo2A_9h"
 
 echo ">>> Настройка Kibana..."
 cp /tmp/repo/elk/kibana.yml /etc/kibana/kibana.yml
