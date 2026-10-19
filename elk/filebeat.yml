@@ -161,10 +161,7 @@ setup.kibana:
 # ---------------------------- Elasticsearch Output ----------------------------
 output.elasticsearch:
   # Array of hosts to connect to.
-  hosts: ["https://192.168.205.107:9200"]
-  username: "elastic"
-  password: "<PASSWORD>"
-  ssl.verification_mode: none
+  hosts: ["http://192.168.205.107:9200"]
   pipeline: "filebeat-8.19.23-nginx-access-pipeline"
   # Performance preset - one of "balanced", "throughput", "scale",
   # "latency", or "custom".
