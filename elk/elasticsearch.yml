@@ -89,21 +89,21 @@ path.logs: /var/log/elasticsearch
 # --------------------------------------------------------------------------------
 
 # Enable security features
-xpack.security.enabled: true
+# xpack.security.enabled: true
 
-xpack.security.enrollment.enabled: true
+# xpack.security.enrollment.enabled: true
 
 # Enable encryption for HTTP API client connections, such as Kibana, Logstash, and Agents
-xpack.security.http.ssl:
-  enabled: true
-  keystore.path: certs/http.p12
+# xpack.security.http.ssl:
+#  enabled: true
+#  keystore.path: certs/http.p12
 
 # Enable encryption and mutual authentication between cluster nodes
-xpack.security.transport.ssl:
-  enabled: true
-  verification_mode: certificate
-  keystore.path: certs/transport.p12
-  truststore.path: certs/transport.p12
+# xpack.security.transport.ssl:
+# enabled: true
+#  verification_mode: certificate
+#  keystore.path: certs/transport.p12
+#  truststore.path: certs/transport.p12
 # Create a new cluster with the current node only
 # Additional nodes can still join the cluster later
 # cluster.initial_master_nodes: ["elk"]
@@ -114,7 +114,7 @@ http.host: 0.0.0.0
 
 # Allow other nodes to join the cluster from anywhere
 # Connections are encrypted and mutually authenticated
-#transport.host: 0.0.0.0
+# transport.host: 0.0.0.0
 
 #----------------------- END SECURITY AUTO CONFIGURATION -------------------------
 discovery.type: single-node
