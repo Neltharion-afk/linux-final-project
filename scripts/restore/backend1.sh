@@ -50,11 +50,35 @@ cp -r wordpress/* /var/www/html/
 chown -R www-data:www-data /var/www/html/
 
 echo ">>> Настройка Apache (порты 8080 и 8082)..."
-cp /tmp/repo/apache/backend1-ports.conf /etc/apache2/ports.conf
-cp /tmp/repo/apache/backend1-site-8080.conf /etc/apache2/sites-available/
-cp /tmp/repo/apache/backend1-site-8082.conf /etc/apache2/sites-available/
-a2ensite site-8080 site-8082
-a2dissite 000-default
+# 1. Настраиваем порты
+cat > /etc/apache2/ports.conf << 'EOF'
+Listen 8080
+Listen 8082
+EOF
+
+# 2. Создаем конфиг для 8080
+cat > /etc/apache2/sites-available/000-default.conf << 'EOF'
+<VirtualHost *:8080>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+    ErrorLog ${APACHE_LOG_DIR}/error-8080.log
+    CustomLog ${APACHE_LOG_DIR}/access-8080.log combined
+</VirtualHost>
+EOF
+
+# 3. Создаем конфиг для 8082
+cat > /etc/apache2/sites-available/site-8082.conf << 'EOF'
+<VirtualHost *:8082>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+    ErrorLog ${APACHE_LOG_DIR}/error-8082.log
+    CustomLog ${APACHE_LOG_DIR}/access-8082.log combined
+</VirtualHost>
+EOF
+
+# 4. Включаем сайты
+a2ensite 000-default.conf
+a2ensite site-8082.conf
 
 echo ">>> Настройка wp-config.php..."
 sudo cat > /var/www/html/wp-config.php << 'EOF'
