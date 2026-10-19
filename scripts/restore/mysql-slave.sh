@@ -39,7 +39,7 @@ systemctl restart mysql
 
 echo ">>> Подключение к Мастеру (192.168.205.105) и создание дампа..."
 # Создаем дамп с мастера (предполагается, что root на мастере без пароля)
-mysqldump -h 192.168.205.105 -u root --all-databases --source-data=2 --single-transaction > /tmp/master_dump.sql
+mysqldump -h 192.168.205.105 -u root -p'RootPass123!' --all-databases --source-data=2 --single-transaction > /tmp/master_dump.sql
 
 echo ">>> Извлечение позиции бинлога..."
 BINLOG_FILE=$(grep -m1 "CHANGE REPLICATION SOURCE" /tmp/master_dump.sql | sed -n "s/.*SOURCE_LOG_FILE='\([^']*\)'.*/\1/p")
