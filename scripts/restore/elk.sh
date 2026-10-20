@@ -43,6 +43,8 @@ git clone https://github.com/Neltharion-afk/linux-final-project.git /tmp/repo
 
 echo ">>> Настройка Elasticsearch..."
 cp /tmp/repo/elk/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
+# Удаляем старый keystore, чтобы не было конфликтов
+rm -f /etc/elasticsearch/elasticsearch.keystore
 # Даем права на папку конфигов (чтобы keystore создавался)
 chown -R elasticsearch:elasticsearch /etc/elasticsearch
 systemctl daemon-reload
