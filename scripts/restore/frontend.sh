@@ -71,8 +71,28 @@ systemctl enable --now grafana-server
 
 echo ">>> Установка и настройка Filebeat..."
 cd /tmp
-wget -q https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.19.23-amd64.deb
+# Качаем Filebeat с таймаутом и зеркалом
+wget -q --timeout=60 --tries=2 https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.19.23-amd64.deb || \
+wget -q --timeout=60 --tries=2 https://mirror.yandex.ru/mirrors/elastic/8/pool/main/f/filebeat/filebeat-8.19.23-amd64.deb
+
 dpkg -i filebeat-8.19.23-amd64.deb || apt install -f -y
+
+# Копируем основной конфиг
+cp /tmp/repo/elk/filebeat.yml /etc/filebeat/filebeat.yml
+
+# Cоздаем конфиг модуля nginx (чтобы не было "no enabled filesets")
+mkdir -p /etc/filebeat/modules.d
+cat > /etc/filebeat/modules.d/nginx.yml << 'EOF'
+- module: nginx
+  access:
+    enabled: true
+    var.paths: ["/var/log/nginx/access.log"]
+  error:
+    enabled: true
+    var.paths: ["/var/log/nginx/error.log"]
+EOF
+
+systemctl enable --now filebeat
 
 # Копируем готовый конфиг из репо
 cp /tmp/repo/elk/filebeat.yml /etc/filebeat/filebeat.yml
