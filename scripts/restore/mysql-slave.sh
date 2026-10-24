@@ -1,11 +1,6 @@
 #!/bin/bash
 set -e
 
-# ==========================================
-# Скрипт восстановления MYSQL SLAVE (192.168.205.106)
-# Запускать от root (sudo bash mysql-slave.sh)
-# ==========================================
-
 echo ">>> Настройка сети и hostname..."
 hostnamectl set-hostname mysql-slave
 cat > /etc/netplan/00-installer-config.yaml << 'EOF'
@@ -25,38 +20,59 @@ EOF
 netplan apply
 sleep 3
 
-echo ">>> Установка MySQL, клиента и Git..."
+echo ">>> Установка MySQL и Git..."
 export DEBIAN_FRONTEND=noninteractive
 apt update && apt install -y mysql-server mysql-client git
 
-echo ">>> Клонирование конфигов из репозитория..."
+echo ">>> Жесткая настройка пароля root..."
+sudo systemctl stop mysql || true
+sudo mkdir -p /etc/systemd/system/mysql.service.d
+cat > /etc/systemd/system/mysql.service.d/override.conf << 'EOF'
+[Service]
+ExecStart=
+ExecStart=/usr/sbin/mysqld --skip-grant-tables --skip-networking
+EOF
+sudo systemctl daemon-reload
+sudo systemctl start mysql
+sleep 5
+
+# Сбрасываем пароль
+mysql -u root <<EOF
+FLUSH PRIVILEGES;
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'SlavePass123!';
+EOF
+
+# Возвращаем нормальный режим
+sudo rm -rf /etc/systemd/system/mysql.service.d
+sudo systemctl daemon-reload
+sudo systemctl restart mysql
+sleep 3
+
+echo ">>> Настройка конфигов слейва..."
 rm -rf /tmp/repo
 git clone https://github.com/Neltharion-afk/linux-final-project.git /tmp/repo
-
-echo ">>> Применение конфига Slave..."
 cp /tmp/repo/mysql/slave.cnf /etc/mysql/mysql.conf.d/mysqld.cnf
 systemctl restart mysql
 
-echo ">>> Подключение к Мастеру (192.168.205.105) и создание дампа..."
-# Создаем дамп с мастера (предполагается, что root на мастере без пароля)
-mysqldump -h 192.168.205.105 -u root -p'RootPass123!' --all-databases --source-data=2 --single-transaction > /tmp/master_dump.sql
-
-echo ">>> Извлечение позиции бинлога..."
-BINLOG_FILE=$(grep -m1 "CHANGE REPLICATION SOURCE" /tmp/master_dump.sql | sed -n "s/.*SOURCE_LOG_FILE='\([^']*\)'.*/\1/p")
-BINLOG_POS=$(grep -m1 "CHANGE REPLICATION SOURCE" /tmp/master_dump.sql | sed -n "s/.*SOURCE_LOG_POS=\([0-9]*\).*/\1/p")
+echo ">>> Получение координат с Мастера (192.168.205.105)..."
+MASTER_INFO=$(mysql -h 192.168.205.105 -u replicator -p'Repl1c@torPass!' -e "SHOW BINARY LOG STATUS\G")
+BINLOG_FILE=$(echo "$MASTER_INFO" | grep "File:" | awk '{print $2}')
+BINLOG_POS=$(echo "$MASTER_INFO" | grep "Position:" | awk '{print $2}')
 
 if [ -z "$BINLOG_FILE" ] || [ -z "$BINLOG_POS" ]; then
-    echo "ОШИБКА: Не удалось получить позицию бинлога с мастера!"
+    echo "ОШИБКА: Не удалось получить координаты с мастера!"
     exit 1
 fi
+echo ">>> Координаты мастера: $BINLOG_FILE, $BINLOG_POS"
 
-echo ">>> Заливка дампа в локальную базу..."
-mysql < /tmp/master_dump.sql
+echo ">>> Создание дампа и заливка локально..."
+mysqldump -h 192.168.205.105 -u replicator -p'Repl1c@torPass!' --all-databases --source-data=2 --single-transaction > /tmp/master_dump.sql
+mysql -u root -p'SlavePass123!' < /tmp/master_dump.sql
 
 echo ">>> Настройка репликации..."
-mysql -e "STOP REPLICA;"
-mysql -e "CHANGE REPLICATION SOURCE TO SOURCE_HOST='192.168.205.105', SOURCE_USER='replicator', SOURCE_PASSWORD='Repl1c@torPass!', SOURCE_LOG_FILE='$BINLOG_FILE', SOURCE_LOG_POS=$BINLOG_POS, GET_SOURCE_PUBLIC_KEY=1;"
-mysql -e "START REPLICA;"
+mysql -u root -p'SlavePass123!' -e "STOP REPLICA;"
+mysql -u root -p'SlavePass123!' -e "CHANGE REPLICATION SOURCE TO SOURCE_HOST='192.168.205.105', SOURCE_USER='replicator', SOURCE_PASSWORD='Repl1c@torPass!', SOURCE_LOG_FILE='$BINLOG_FILE', SOURCE_LOG_POS=$BINLOG_POS, GET_SOURCE_PUBLIC_KEY=1;"
+mysql -u root -p'SlavePass123!' -e "START REPLICA;"
 
 echo ">>> Установка Node Exporter..."
 cd /tmp
@@ -67,6 +83,6 @@ useradd --no-create-home --shell /bin/false node_exporter || true
 cp /tmp/repo/monitoring/node_exporter.service /etc/systemd/system/
 systemctl daemon-reload && systemctl enable --now node_exporter
 
-echo ">>> MYSQL SLAVE успешно восстановлен!"
-echo ">>> Текущий статус репликации:"
-mysql -e "SHOW REPLICA STATUS\G" | grep -E "Replica_IO_Running|Replica_SQL_Running"
+echo ">>> MYSQL SLAVE успешно восстановлен! (Пароль root: SlavePass123!)"
+echo ">>> Статус репликации:"
+mysql -u root -p'SlavePass123!' -e "SHOW REPLICA STATUS\G" | grep -E "Replica_IO_Running|Replica_SQL_Running"
