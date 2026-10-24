@@ -82,6 +82,8 @@ mysql -u root -p'SlavePass123!' -e "CHANGE REPLICATION SOURCE TO SOURCE_HOST='19
 mysql -u root -p'SlavePass123!' -e "START REPLICA;"
 
 echo ">>> Установка Node Exporter..."
+rm -rf /tmp/repo
+git clone https://github.com/Neltharion-afk/linux-final-project.git /tmp/repo
 cd /tmp
 wget -q https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz
 tar -xzf node_exporter-*.tar.gz
