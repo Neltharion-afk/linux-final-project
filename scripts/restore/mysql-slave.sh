@@ -27,12 +27,14 @@ apt update && apt install -y mysql-server mysql-client git
 echo ">>> Жесткая настройка пароля root..."
 sudo systemctl stop mysql || true
 
-# Удаляем старый конфиг, чтобы убрать auth_socket, и ставим свой базовый
+# Удаляем старый конфиг, чтобы убрать auth_socket, и ставим свой базовый (server-id = 2!)
 cat > /etc/mysql/mysql.conf.d/mysqld.cnf << 'EOF'
 [mysqld]
-server-id = 1
+server-id = 2
+relay-log = /var/log/mysql/mysql-relay-bin.log
 log_bin = /var/log/mysql/mysql-bin.log
 binlog_format = ROW
+read_only = ON
 bind-address = 0.0.0.0
 EOF
 
@@ -47,10 +49,10 @@ sudo systemctl daemon-reload
 sudo systemctl start mysql
 sleep 5
 
-# Сбрасываем пароль (теперь auth_socket тут не помешает)
+# Сбрасываем пароль
 mysql -u root <<EOF
 FLUSH PRIVILEGES;
-ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'MasterPass123!';
+ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'SlavePass123!';
 EOF
 
 # Возвращаем нормальный режим
@@ -58,11 +60,6 @@ sudo rm -rf /etc/systemd/system/mysql.service.d
 sudo systemctl daemon-reload
 sudo systemctl restart mysql
 sleep 3
-echo ">>> Настройка конфигов слейва..."
-rm -rf /tmp/repo
-git clone https://github.com/Neltharion-afk/linux-final-project.git /tmp/repo
-cp /tmp/repo/mysql/slave.cnf /etc/mysql/mysql.conf.d/mysqld.cnf
-systemctl restart mysql
 
 echo ">>> Получение координат с Мастера (192.168.205.105)..."
 MASTER_INFO=$(mysql -h 192.168.205.105 -u replicator -p'Repl1c@torPass!' -e "SHOW BINARY LOG STATUS\G")
