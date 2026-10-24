@@ -67,12 +67,11 @@ echo ">>> Перенастройка Slave на новые координаты.
 BINLOG_FILE=$(mysql -N -e "SHOW BINARY LOG STATUS;" | awk '{print $1}')
 BINLOG_POS=$(mysql -N -e "SHOW BINARY LOG STATUS;" | awk '{print $2}')
 
-echo "Новые координаты: $BINLOG_FILE:$BINLOG_POS"
+# Экспортируем переменные для удаленного выполнения
+BINLOG_FILE=$(mysql -N -e "SHOW BINARY LOG STATUS;" | awk '{print $1}')
+BINLOG_POS=$(mysql -N -e "SHOW BINARY LOG STATUS;" | awk '{print $2}')
 
-# Отправляем команду на слейв по SSH
-echo "!!! ВАЖНО: Если у вас был настроен Slave, выполните на нем:"
-echo "STOP REPLICA;"
-echo "CHANGE REPLICATION SOURCE TO SOURCE_HOST='192.168.205.105', SOURCE_USER='replicator', SOURCE_PASSWORD='Repl1c@torPass!', SOURCE_LOG_FILE='$BINLOG_FILE', SOURCE_LOG_POS=$BINLOG_POS, GET_SOURCE_PUBLIC_KEY=1;"
-echo "START REPLICA;"
+# Заходим на слейв и перенастраиваем репликацию
+ssh nikolay@192.168.205.106 "sudo mysql -e \"STOP REPLICA; CHANGE REPLICATION SOURCE TO SOURCE_HOST='192.168.205.105', SOURCE_USER='replicator', SOURCE_PASSWORD='Repl1c@torPass!', SOURCE_LOG_FILE='$BINLOG_FILE', SOURCE_LOG_POS=$BINLOG_POS, GET_SOURCE_PUBLIC_KEY=1; START REPLICA;\""
 
 echo ">>> MYSQL MASTER успешно восстановлен! (Порт: 3306, База залита)"
