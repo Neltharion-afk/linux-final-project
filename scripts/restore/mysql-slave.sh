@@ -76,7 +76,7 @@ fi
 echo ">>> Координаты мастера: $BINLOG_FILE, $BINLOG_POS"
 
 echo ">>> Создание дампа и заливка локально..."
-mysqldump -h 192.168.205.105 -u replicator -p'Repl1c@torPass!' --all-databases --source-data=2 --single-transaction > /tmp/master_dump.sql
+mysqldump -h 192.168.205.105 -u replicator -p'Repl1c@torPass!' --all-databases --source-data=2 --single-transaction --skip-lock-tables > /tmp/master_dump.sql
 mysql -u root -p'SlavePass123!' < /tmp/master_dump.sql
 
 echo ">>> Настройка репликации..."
