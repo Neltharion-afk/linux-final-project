@@ -22,11 +22,12 @@
 **Признаки:** Сайт открывается, но ```Nginx``` отдает ```502 Bad Gateway``` на порт 8080/8082.
 
 **Действия на новой чистой VM (назначить IP ```92.168.205.103```):**
-```bash
+```
 sudo apt update && sudo apt install -y git
 sudo rm -rf /tmp/linux-final-project
 git clone https://github.com/Neltharion-afk/linux-final-project.git /tmp/linux-final-project
 sudo bash /tmp/linux-final-project/scripts/restore/backend1.sh
+```
 
 ```
 sudo systemctl status apache2 | grep Active
