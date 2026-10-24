@@ -26,6 +26,17 @@ apt update && apt install -y mysql-server mysql-client git
 
 echo ">>> Жесткая настройка пароля root..."
 sudo systemctl stop mysql || true
+
+# Удаляем старый конфиг, чтобы убрать auth_socket, и ставим свой базовый
+cat > /etc/mysql/mysql.conf.d/mysqld.cnf << 'EOF'
+[mysqld]
+server-id = 1
+log_bin = /var/log/mysql/mysql-bin.log
+binlog_format = ROW
+bind-address = 0.0.0.0
+EOF
+
+# Настраиваем systemd на аварийный режим
 sudo mkdir -p /etc/systemd/system/mysql.service.d
 cat > /etc/systemd/system/mysql.service.d/override.conf << 'EOF'
 [Service]
@@ -36,10 +47,10 @@ sudo systemctl daemon-reload
 sudo systemctl start mysql
 sleep 5
 
-# Сбрасываем пароль
+# Сбрасываем пароль (теперь auth_socket тут не помешает)
 mysql -u root <<EOF
 FLUSH PRIVILEGES;
-ALTER USER 'root'@'localhost' IDENTIFIED BY 'SlavePass123!';
+ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'MasterPass123!';
 EOF
 
 # Возвращаем нормальный режим
@@ -47,7 +58,6 @@ sudo rm -rf /etc/systemd/system/mysql.service.d
 sudo systemctl daemon-reload
 sudo systemctl restart mysql
 sleep 3
-
 echo ">>> Настройка конфигов слейва..."
 rm -rf /tmp/repo
 git clone https://github.com/Neltharion-afk/linux-final-project.git /tmp/repo
