@@ -9,6 +9,7 @@
 - **vm3-backend2** (192.168.205.104): apache (8081), WordPress
 - **vm4-master** (192.168.205.105): MySQL Master
 - **vm5-slave** (192.168.205.106): MySQL Slave + бэкапы
+- **vm6-elk** (192.168.205.107): Monitoring elk
 
 ## Компоненты
 
