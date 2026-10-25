@@ -159,10 +159,10 @@ setup.kibana:
 # Configure what output to use when sending the data collected by the beat.
 
 # ---------------------------- Elasticsearch Output ----------------------------
-output.elasticsearch:
+# output.elasticsearch:
   # Array of hosts to connect to.
-  hosts: ["http://192.168.205.107:9200"]
-  pipeline: "filebeat-8.19.23-nginx-access-pipeline"
+#   hosts: ["http://192.168.205.107:9200"]
+#   pipeline: "filebeat-8.19.23-nginx-access-pipeline"
   # Performance preset - one of "balanced", "throughput", "scale",
   # "latency", or "custom".
 #  preset: balanced
@@ -176,9 +176,9 @@ output.elasticsearch:
   #password: "changeme"
 
 # ------------------------------ Logstash Output -------------------------------
-#output.logstash:
+output.logstash:
   # The Logstash hosts
-# hosts: ["192.168.205.107:5044"]
+hosts: ["192.168.205.107:5044"]
 
   # Optional SSL. By default is off.
   # List of root certificates for HTTPS server verifications
